@@ -24,11 +24,4 @@ Route::apiResource('products', ProductController::class);
 Route::post('/upload-image', [ImageController::class, 'upload']);
 
 // Rutas para el punto de venta
-Route::prefix('sales')->group(function () {
-    Route::get('/', [SaleController::class, 'index']);
-    Route::post('/', [SaleController::class, 'store']);
-    Route::get('/{sale}', [SaleController::class, 'show']);
-    Route::delete('/{sale}', [SaleController::class, 'destroy']);
-    Route::get('/report/by-date', [SaleController::class, 'getSalesByDate']);
-    Route::get('/report/top-products', [SaleController::class, 'getTopProducts']);
-});
+Route::apiResource('sales', SaleController::class);
