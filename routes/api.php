@@ -25,3 +25,5 @@ Route::post('/upload-image', [ImageController::class, 'upload']);
 
 // Rutas para el punto de venta
 Route::apiResource('sales', SaleController::class);
+Route::get('sales/report/by-date', [SaleController::class, 'getSalesByDate']);
+Route::get('sales/report/top-products', [SaleController::class, 'getTopProducts']);

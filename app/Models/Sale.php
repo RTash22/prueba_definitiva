@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Product;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sale extends Model
 {
-    /** @use HasFactory<\Database\Factories\SaleFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -20,9 +19,12 @@ class Sale extends Model
         'status'
     ];
 
-    public function product()
+    /**
+     * Relación con el modelo Product
+     */
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
     protected static function boot()
@@ -30,13 +32,15 @@ class Sale extends Model
         parent::boot();
 
         static::created(function ($sale) {
-            $product = $sale->product;
-            $product->increment('sales_count', $sale->quantity);
+            if ($sale->product) {
+                $sale->product->increment('sales_count', $sale->quantity);
+            }
         });
 
         static::deleted(function ($sale) {
-            $product = $sale->product;
-            $product->decrement('sales_count', $sale->quantity);
+            if ($sale->product) {
+                $sale->product->decrement('sales_count', $sale->quantity);
+            }
         });
     }
 }

@@ -28,6 +28,15 @@ class SaleController extends Controller
 
             $product = Product::findOrFail($request->product_id);
             
+            // Verificar si hay suficiente stock
+            if ($product->stock < $request->quantity) {
+                return response()->json([
+                    'message' => 'No hay suficiente stock disponible',
+                    'available_stock' => $product->stock
+                ], 400);
+            }
+
+            // Crear la venta
             $sale = Sale::create([
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
@@ -36,6 +45,9 @@ class SaleController extends Controller
                 'payment_method' => $request->payment_method,
                 'status' => 'completed'
             ]);
+
+            // Actualizar el stock del producto
+            $product->decrement('stock', $request->quantity);
 
             DB::commit();
             return response()->json([
@@ -80,7 +92,7 @@ class SaleController extends Controller
     {
         $topProducts = Product::orderBy('sales_count', 'desc')
             ->take(10)
-            ->get(['id', 'name', 'price', 'sales_count']);
+            ->get(['id', 'name', 'price', 'sales_count', 'stock']);
 
         return response()->json($topProducts);
     }
@@ -89,6 +101,10 @@ class SaleController extends Controller
     {
         try {
             DB::beginTransaction();
+            
+            // Restaurar el stock del producto
+            $sale->product->increment('stock', $sale->quantity);
+            
             $sale->delete();
             DB::commit();
             
